@@ -1,6 +1,7 @@
 # Smart contract vulnerability detection paper
 
-#program analysis
+##program analysis
+
 
 | Name of Publications                                         |
 | ------------------------------------------------------------ |
@@ -20,7 +21,7 @@
 | GasChecker: Scalable Analysis for Discovering Gas-Inefficient Smart Contracts |
 | Securify: Practical Security Analysis of Smart Contracts     |
 
-#Formal Verification 
+##Formal Verification 
 | Name of Publications                                         |
 | ------------------------------------------------------------ |
 | Formal Verification of Smart Contracts                       |
@@ -29,7 +30,7 @@
 | Towards verifying ethereum smart contract bytecode in Isabelle/HOL |
 | ZEUS: Analyzing Safety of Smart Contracts                    |
 
-#Fuzzing
+##Fuzzing
 | Name of Publications                                         |
 | ------------------------------------------------------------ |
 | ContractFuzzer: fuzzing smart contracts for vulnerability detection |
@@ -38,7 +39,7 @@
 | sFuzz: An Efficient Adaptive Fuzzer for Solidity Smart Contracts |
 | Exploiting the Laws of Order in Smart Contracts              |
 
-#Machine Learning
+##Machine Learning
 | Name of Publications                                         |
 | ------------------------------------------------------------ |
 | S-gram: Towards Semantic-Aware Security Auditing for Ethereum Smart Contracts |
@@ -46,7 +47,7 @@
 | Towards Safer Smart Contracts: A Sequence Learning Approach to Detecting Security Threats |
 | Checking Smart Contracts with Structural Code Embedding      |
 
-#others
+##others
 | Name of Publications                                         |
 | ------------------------------------------------------------ |
 | Designing Secure Ethereum Smart Contracts: A Finite State Machine Based Approach  |
@@ -66,7 +67,7 @@
 | Bytecode Rewriting     |      | Monitoring smart contracts: ContractLarva and open challenges beyond |
 | Input Detection        |      | Town Crier: An Authenticated Data Feed for Smart Contracts   |
 | Input Detection        |      | FSFC: An input filter-based secure framework for smart contract |
-| Transactions Detection |      | ÆGIS: Smart Shielding of Smart Contracts [108]               |
+| Transactions Detection |      | ÆGIS: Smart Shielding of Smart Contracts                |
 | Transactions Detection |      | VULTRON: Catching Vulnerable Smart Contracts Once and for All |
 | State Detection        |      | Sereum: Protecting Existing Smart Contracts Against Re-Entrancy Attacks |
 | Intrusion Detection    |      | ContractGuard: Defend Ethereum Smart Contracts with Embedded | Intrusion Detection |
