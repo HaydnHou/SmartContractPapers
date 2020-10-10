@@ -121,6 +121,7 @@
 121. Zheng, Z., Xie, S., Dai, H. N., Chen, W., Chen, X., Weng, J., & Imran, M. (2020). An overview on smart contracts: Challenges, advances and platforms. Future Generation Computer Systems, 105, 475-491.
 122. Zheng, Z., Xie, S., Dai, H., Chen, X., & Wang, H. (2017, June). An overview of blockchain technology: Architecture, consensus, and future trends. In 2017 IEEE international congress on big data (BigData congress) (pp. 557-564). IEEE.
 123. Zheng, Z., Xie, S., Dai, H. N., Chen, X., & Wang, H. (2018). Blockchain challenges and opportunities: A survey. International Journal of Web and Grid Services, 14(4), 352-375.
+
 124. Casado-Vara, R., González-Briones, A., Prieto, J., & Corchado, J. M. (2018, June). Smart contract for monitoring and control of logistics activities: pharmaceutical utilities case study. In The 13th International Conference on Soft Computing Models in Industrial and Environmental Applications (pp. 509-517). Springer, Cham.
 125. Bogner, A., Chanson, M., & Meeuw, A. (2016, November). A decentralised sharing app running a smart contract on the ethereum blockchain. In Proceedings of the 6th International Conference on the Internet of Things (pp. 177-178).
 126. Bocek, T., & Stiller, B. (2018). Smart contracts–blockchains in the wings. In Digital Marketplaces Unleashed (pp. 169-184). Springer, Berlin, Heidelberg.
