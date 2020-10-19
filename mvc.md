@@ -33,11 +33,11 @@ List <Map> eventList（@Param（“ keywords”）字符串关键字，@ Param�
 miletaskeventMapper.xml文件控制数据库操作
 <mapper namespace =“ com.eec.information.mapper.EventMapper”>
     <select id =“ eventList” resultType =“ java.util.Map”>
-        选择
+        select
         t1.id，t1.code，t1.sm_code，t1.title，t1.description，t2.id AS aId，t2.code AS aCode
-        从
+        from
         tra_milestone_tasknode_event t1，tra_milepost t2
-        哪里
+        where
         t1.sm_code = t2.code
         <if test =“ eventId！= null”>
             AND t1.id =＃{eventId}
@@ -46,13 +46,48 @@ miletaskeventMapper.xml文件控制数据库操作
 </ mapper>
 
 
-服务层
+服务层service层/add
+
+
+​        
+```java
+    @Override
+    public Class1DTO add(Class1DTO class1DTO) {
+    	isTrue((nonNull(classDTO)), ErrorEnum.ENTITY_NOT_NULL.getMessage());
+			BeanConverter<Class1DTO, Class1> beanConverter = new BeanConverter<>();  
+   		Class1 class1 = beanConverter.convertToPO(class1DTO, Class1.class);
+    	class1Mapper.insertSelective(class1);
+     /*调整格式符合前端显示 
+    List<TraMilestoneTasknodeDTO> traMilestoneTasknodeDTOS = traMilestoneDTO.getTraMilestoneTasknodeDTOS();
+    for (TraMilestoneTasknodeDTO traMilestoneTasknodeDTO:traMilestoneTasknodeDTOS) {
+        BeanConverter<TraMilestoneTasknodeDTO, TraMilestoneTasknode> beanConverter1 = new BeanConverter<>();
+        TraMilestoneTasknode traMilestoneTasknode = beanConverter1.convertToPO(traMilestoneTasknodeDTO, TraMilestoneTasknode.class);
+        traMilestoneTasknode.setSm_code(traMilestone.getCode());
+        traMilestoneTasknode.setSm_id(traMilestone.getId());
+        traMilestoneTasknodeMapper.insertSelective(traMilestoneTasknode);
+    }*/
+    return beanConverter.convertToDTO(class1, Class1DTO.class);
+}
+
+
+ @Override
+    public MilepostDTO add(MilepostDTO milepostDTO) {   
+        isTrue((nonNull(milepostDTO)), ErrorEnum.ENTITY_NOT_NULL.getMessage());
+        BeanConverter<MilepostDTO, Milepost> beanConverter = new BeanConverter<>();
+        Milepost milepost = beanConverter.convertToPO(milepostDTO, Milepost.class);
+        milepostMapper.insertSelective(milepost);
+        return beanConverter.convertToDTO(milepost, MilepostDTO.class);
+    }
+```
+
+
 
 
 
 控制器层
 私有EventService eventService; //控制服务界面
 //接收前端传来的参数
+```java
 @PostMapping（“ / add”）
     公共ModelMap add（@Validated @RequestBody EventDTO eventDTO）{
         返回成功（eventService.add（eventDTO））; //控制服务界面
@@ -70,5 +105,5 @@ miletaskeventMapper.xml文件控制数据库操作
     公共ModelMap列表（@RequestBody（required = false）EventDTO eventDTO）{
         返回成功（eventService.findPage（eventDTO），true）;
     } //接收前端传来的参数
-
+```
 
