@@ -434,3 +434,164 @@ public interface TraMilestoneMapper extends BaseMapper<TraMilestone> {
 实现更加复杂数据格式放在dto中，显示与前端数据格式保持一致。
 
 
+
+
+
+
+
+
+
+Q:如何实现上传文件，上传图片等功能
+
+A:建两个数据库表，另一个放上传图片文件等功能。
+
+```java
+@Data//实体类entity
+@Table(name="数据库表名")
+public class ClassnameFile extends BaseEntity {
+    @Column(name = "id")//与数据库中的一一对应
+    private Long id;
+
+    @Column(name = "file_id")
+    private String fileId;//文件id
+
+    @Column(name = "sort")
+    private Integer sort;//各个属性
+
+    @Transient
+    private String flag;//各个属性
+    
+}
+```
+
+另一个类照数据库一一对应，在dto中实现前端显示功能
+
+```java
+@Data
+//在dto中DTO
+public class ClassnameDTO extends BaseEntity {     
+
+  	private Long id; //主键
+    private Long taskId;
+  	/*各项属性
+    private String name;    
+    private String  content;   
+    private String reply;    
+    private Long replyerId;    
+    private String replyer;*/
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")    //批示时间
+    private Date replyDate;   
+    private Integer status;//状态
+    private List<TraMilestoneAffairFile> fileList;//实现上传文件、图片等的属性。
+}
+```
+
+controller基本相同， mapper要与entity中一一对应，也就是数据库表对应。
+
+serviceimpl
+
+```java
+@Service//标记
+@Transactional(isolation = Isolation.DEFAULT,propagation = Propagation.REQUIRED,readOnly = false)
+public class TraMilestoneAffairServiceImpl implements TraMilestoneAffairService {
+    @Autowired//自动注入
+    ClassnameMapper classnameMapper;//mapper
+    @Autowired
+    ClassnameFileMapper classnameFileMapper;//实现上传文件的mapper
+    @Resource
+    BaseService baseService;//基础service
+
+    @Override//add 增
+    public void add(TraMilestoneAffairDTO affairDTO) {
+        isTrue((nonNull(affairDTO)), ErrorEnum.ENTITY_NOT_NULL.getMessage());//是否为空
+        BeanConverter<TraMilestoneAffairDTO, TraMilestoneAffair> beanConverter = new BeanConverter<>();//new BeanConverter
+        List<TraMilestoneAffairFile> filelist = affairDTO.getFileList();// list 文件
+        TraMilestoneAffair affairdata = beanConverter.convertToPO(affairDTO, TraMilestoneAffair.class);//注入
+        affairMapper.insertSelective(affairdata);
+        for(TraMilestoneAffairFile file : filelist){
+            affairFileMapper.insert(file);//增加文件
+        }
+
+    }
+    @Override//update 改
+    public void update(TraMilestoneAffairDTO affairDTO)  {
+        BeanConverter<TraMilestoneAffairDTO, TraMilestoneAffair> beanConverter = new BeanConverter<>();
+
+        List<TraMilestoneAffairFile> filelist = affairDTO.getFileList();
+        if(null!=affairDTO.getId()){
+            TraMilestoneAffair traMilestone = affairMapper.selectByPrimaryKey(affairDTO.getId());
+            isTrue(nonNull(traMilestone), ErrorEnum.ENTITY_IS_NOT_EXIST.getMessage());
+            copyProperties(affairDTO, traMilestone, SysConstant.IGNORE_PROPERTIES);
+            affairMapper.updateByPrimaryKeySelective(traMilestone);
+            for(TraMilestoneAffairFile file : filelist){
+                TraMilestoneAffairFile affairFile = new  TraMilestoneAffairFile();
+                affairFile.setFileId(file.getFileId());
+                TraMilestoneAffairFile affairFile2 = affairFileMapper.selectOne(file);
+                if(affairFile2==null){
+                    file.setAffairId(traMilestone.getId());
+                    affairFileMapper.insert(file);
+                }else{
+                    if("false".equals(file.getFlag())){
+                        affairFileMapper.delete(affairFile) ;
+                    }
+                }
+            }
+        }else{
+            TraMilestoneAffair affairdata = beanConverter.convertToPO(affairDTO, TraMilestoneAffair.class);
+            affairMapper.insertSelective(affairdata);
+            for(TraMilestoneAffairFile file : filelist){
+                file.setAffairId(affairdata.getId());
+                affairFileMapper.insert(file);
+            }
+        }
+    }
+
+
+    @Override//find 查 通过ID
+    public TraMilestoneAffairDTO getByID(Long id) {
+        BeanConverter<TraMilestoneAffair,TraMilestoneAffairDTO> beanConverter = new BeanConverter<>();
+        TraMilestoneAffair affairdata = affairMapper.selectByPrimaryKey(id);
+        TraMilestoneAffairDTO affairDto = beanConverter.convertToPO(affairdata, TraMilestoneAffairDTO.class);
+        TraMilestoneAffairFile file = new TraMilestoneAffairFile();
+        file.setAffairId(affairDto.getId());
+        List<TraMilestoneAffairFile> fileList = affairFileMapper.select(file);
+
+        for(TraMilestoneAffairFile file1 : fileList){
+            StringBuffer sql  = new StringBuffer(" select id,original_name,suffix,path,name from com_file where id = ");
+            sql.append(file1.getFileId()+"");
+            Map<String,Object> map = baseService.queryMapbySql(sql);
+            if(map!=null){
+                file1.setUrl(map.get("path").toString()+map.get("name")+"."+map.get("suffix"));
+                file1.setType(map.get("suffix").toString());
+                file1.setName(map.get("original_name")+"");
+            }
+        }
+        affairDto.setFileList(fileList);
+        return  affairDto;
+    }
+
+    @Override//find 通过高节点类的ID
+    public List<TraMilestoneAffairDTO> getByTaskID(Long id) {
+        List<TraMilestoneAffairDTO> dtoList = new ArrayList<>();
+        TraMilestoneAffair affair = new TraMilestoneAffair();
+        affair.setTaskId(id);
+        List<TraMilestoneAffair> affairList = affairMapper.select(affair);
+        for(TraMilestoneAffair affair1 : affairList){//查询旗下所有的子节点类
+            TraMilestoneAffairDTO dto =  getByID(affair1.getId());
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
+
+    @Override
+    public List<Map> replys(Long id) {
+        StringBuffer stringBuffer = new StringBuffer("SELECT id,`name`,content,reply,replyer_id replyerId,replyer,date_format(replyDate, '%Y-%m-%d %H:%I:%s') replyDate from tra_milestone_affair where reply is not null and task_id=");
+        stringBuffer.append(id);
+        return baseService.listMapBySql(stringBuffer);
+    }
+
+    @Override
+    public void delete(Long id) {
+        affairMapper.deleteByPrimaryKey(id);
+    }
+```
