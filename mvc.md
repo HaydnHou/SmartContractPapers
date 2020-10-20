@@ -430,8 +430,7 @@ public interface TraMilestoneMapper extends BaseMapper<TraMilestone> {
 }
 ```
 
+实体层与数据库中数据一一对应。
+实现更加复杂数据格式放在dto中，显示与前端数据格式保持一致。
 
-```java
-
-```
 
