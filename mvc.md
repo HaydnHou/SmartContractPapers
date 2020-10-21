@@ -509,37 +509,38 @@ public class TraMilestoneAffairServiceImpl implements TraMilestoneAffairService 
         TraMilestoneAffair affairdata = beanConverter.convertToPO(affairDTO, TraMilestoneAffair.class);//注入
         affairMapper.insertSelective(affairdata);
         for(TraMilestoneAffairFile file : filelist){
-            affairFileMapper.insert(file);//增加文件
+            affairFileMapper.insert(file);//循环增加文件
         }
 
     }
     @Override//update 改
     public void update(TraMilestoneAffairDTO affairDTO)  {
-        BeanConverter<TraMilestoneAffairDTO, TraMilestoneAffair> beanConverter = new BeanConverter<>();
+        BeanConverter<TraMilestoneAffairDTO, TraMilestoneAffair> beanConverter = new BeanConverter<>();//new BeanConverter
 
-        List<TraMilestoneAffairFile> filelist = affairDTO.getFileList();
-        if(null!=affairDTO.getId()){
+        List<TraMilestoneAffairFile> filelist = affairDTO.getFileList();//获取文件list
+        if(null!=affairDTO.getId()){//ID不为空
             TraMilestoneAffair traMilestone = affairMapper.selectByPrimaryKey(affairDTO.getId());
-            isTrue(nonNull(traMilestone), ErrorEnum.ENTITY_IS_NOT_EXIST.getMessage());
-            copyProperties(affairDTO, traMilestone, SysConstant.IGNORE_PROPERTIES);
-            affairMapper.updateByPrimaryKeySelective(traMilestone);
-            for(TraMilestoneAffairFile file : filelist){
-                TraMilestoneAffairFile affairFile = new  TraMilestoneAffairFile();
-                affairFile.setFileId(file.getFileId());
-                TraMilestoneAffairFile affairFile2 = affairFileMapper.selectOne(file);
-                if(affairFile2==null){
-                    file.setAffairId(traMilestone.getId());
-                    affairFileMapper.insert(file);
+          	//获取id
+            isTrue(nonNull(traMilestone), ErrorEnum.ENTITY_IS_NOT_EXIST.getMessage());//确认id不为空
+            copyProperties(affairDTO, traMilestone, SysConstant.IGNORE_PROPERTIES);//不懂
+            affairMapper.updateByPrimaryKeySelective(traMilestone);//更新主键
+            for(TraMilestoneAffairFile file : filelist){//循环多次增加文件
+                TraMilestoneAffairFile affairFile = new  TraMilestoneAffairFile();//new file
+                affairFile.setFileId(file.getFileId());//设置文件id
+                TraMilestoneAffairFile affairFile2 = affairFileMapper.selectOne(file);//不懂
+                if(affairFile2==null){//文件为空
+                    file.setAffairId(traMilestone.getId());//获取文件的事件ID
+                    affairFileMapper.insert(file);//文件mapper插入文件
                 }else{
-                    if("false".equals(file.getFlag())){
-                        affairFileMapper.delete(affairFile) ;
+                    if("false".equals(file.getFlag())){//如果flag=0
+                        affairFileMapper.delete(affairFile);//删除旧文件
                     }
                 }
             }
-        }else{
+        }else{//文件不为空
             TraMilestoneAffair affairdata = beanConverter.convertToPO(affairDTO, TraMilestoneAffair.class);
-            affairMapper.insertSelective(affairdata);
-            for(TraMilestoneAffairFile file : filelist){
+            affairMapper.insertSelective(affairdata);//插入文件数据
+            for(TraMilestoneAffairFile file : filelist){//循环插入文件
                 file.setAffairId(affairdata.getId());
                 affairFileMapper.insert(file);
             }
@@ -549,14 +550,14 @@ public class TraMilestoneAffairServiceImpl implements TraMilestoneAffairService 
 
     @Override//find 查 通过ID
     public TraMilestoneAffairDTO getByID(Long id) {
-        BeanConverter<TraMilestoneAffair,TraMilestoneAffairDTO> beanConverter = new BeanConverter<>();
-        TraMilestoneAffair affairdata = affairMapper.selectByPrimaryKey(id);
-        TraMilestoneAffairDTO affairDto = beanConverter.convertToPO(affairdata, TraMilestoneAffairDTO.class);
-        TraMilestoneAffairFile file = new TraMilestoneAffairFile();
-        file.setAffairId(affairDto.getId());
-        List<TraMilestoneAffairFile> fileList = affairFileMapper.select(file);
+        BeanConverter<TraMilestoneAffair,TraMilestoneAffairDTO> beanConverter = new BeanConverter<>();//new beanconverter
+        TraMilestoneAffair affairdata = affairMapper.selectByPrimaryKey(id);//获取为ID里的数据
+        TraMilestoneAffairDTO affairDto = beanConverter.convertToPO(affairdata, TraMilestoneAffairDTO.class);//注入
+        TraMilestoneAffairFile file = new TraMilestoneAffairFile();//new file
+        file.setAffairId(affairDto.getId());//获取file.id
+        List<TraMilestoneAffairFile> fileList = affairFileMapper.select(file);//选择ID相同的所有文件
 
-        for(TraMilestoneAffairFile file1 : fileList){
+        for(TraMilestoneAffairFile file1 : fileList){//循环遍历
             StringBuffer sql  = new StringBuffer(" select id,original_name,suffix,path,name from com_file where id = ");
             sql.append(file1.getFileId()+"");
             Map<String,Object> map = baseService.queryMapbySql(sql);
@@ -566,31 +567,31 @@ public class TraMilestoneAffairServiceImpl implements TraMilestoneAffairService 
                 file1.setName(map.get("original_name")+"");
             }
         }
-        affairDto.setFileList(fileList);
-        return  affairDto;
+        affairDto.setFileList(fileList);//重置filelist
+        return  affairDto;//返回 事件dto
     }
 
-    @Override//find 通过高节点类的ID
+    @Override//find 通过高节点类的ID查询
     public List<TraMilestoneAffairDTO> getByTaskID(Long id) {
-        List<TraMilestoneAffairDTO> dtoList = new ArrayList<>();
-        TraMilestoneAffair affair = new TraMilestoneAffair();
-        affair.setTaskId(id);
-        List<TraMilestoneAffair> affairList = affairMapper.select(affair);
-        for(TraMilestoneAffair affair1 : affairList){//查询旗下所有的子节点类
+        List<TraMilestoneAffairDTO> dtoList = new ArrayList<>();//new list
+        TraMilestoneAffair affair = new TraMilestoneAffair();//new 事件
+        affair.setTaskId(id);//set 事件ID中与之相同的任务id
+        List<TraMilestoneAffair> affairList = affairMapper.select(affair);//select选中事件
+        for(TraMilestoneAffair affair1 : affairList){//查询其下所有的子节点类，遍历循环
             TraMilestoneAffairDTO dto =  getByID(affair1.getId());
             dtoList.add(dto);
         }
-        return dtoList;
+        return dtoList;//返回list
     }
 
-    @Override
+    @Override//通过批注查询
     public List<Map> replys(Long id) {
         StringBuffer stringBuffer = new StringBuffer("SELECT id,`name`,content,reply,replyer_id replyerId,replyer,date_format(replyDate, '%Y-%m-%d %H:%I:%s') replyDate from tra_milestone_affair where reply is not null and task_id=");
         stringBuffer.append(id);
         return baseService.listMapBySql(stringBuffer);
     }
 
-    @Override
+    @Override//delete 通过ID直接删除
     public void delete(Long id) {
         affairMapper.deleteByPrimaryKey(id);
     }
